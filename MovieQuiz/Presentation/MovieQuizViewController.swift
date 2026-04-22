@@ -19,51 +19,51 @@ final class MovieQuizViewController: UIViewController {
     
     private let questions: [QuizQuestion] = [
         QuizQuestion(
-            image: "The Godfather",
+            imageName: "The Godfather",
             text: "Рейтинг этого фильма больше чем 6?",
             correctAnswer: true),
         QuizQuestion(
-            image: "The Dark Knight",
+            imageName: "The Dark Knight",
             text: "Рейтинг этого фильма больше чем 6?",
             correctAnswer: true),
         QuizQuestion(
-            image: "Kill Bill",
+            imageName: "Kill Bill",
             text: "Рейтинг этого фильма больше чем 6?",
             correctAnswer: true),
         QuizQuestion(
-            image: "The Avengers",
+            imageName: "The Avengers",
             text: "Рейтинг этого фильма больше чем 6?",
             correctAnswer: true),
         QuizQuestion(
-            image: "Deadpool",
+            imageName: "Deadpool",
             text: "Рейтинг этого фильма больше чем 6?",
             correctAnswer: true),
         QuizQuestion(
-            image: "The Green Knight",
+            imageName: "The Green Knight",
             text: "Рейтинг этого фильма больше чем 6?",
             correctAnswer: true),
         QuizQuestion(
-            image: "Old",
+            imageName: "Old",
             text: "Рейтинг этого фильма больше чем 6?",
             correctAnswer: false),
         QuizQuestion(
-            image: "The Ice Age Adventures of Buck Wild",
+            imageName: "The Ice Age Adventures of Buck Wild",
             text: "Рейтинг этого фильма больше чем 6?",
             correctAnswer: false),
         QuizQuestion(
-            image: "Tesla",
+            imageName: "Tesla",
             text: "Рейтинг этого фильма больше чем 6?",
             correctAnswer: false),
         QuizQuestion(
-            image: "Vivarium",
+            imageName: "Vivarium",
             text: "Рейтинг этого фильма больше чем 6?",
             correctAnswer: false)
     ]
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
-        let currentquestions = questions[currentQuestionIndex]
-        let viewModel = convert(model: currentquestions)
+        let currentQuestions = questions[currentQuestionIndex]
+        let viewModel = convert(model: currentQuestions)
         
         super.viewDidLoad()
         show(quiz: viewModel)
@@ -94,10 +94,8 @@ final class MovieQuizViewController: UIViewController {
     // MARK: - Private Methods
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let image = UIImage(named: model.image) ?? UIImage()
-        
-        return QuizStepViewModel(
-            image: image,
+        QuizStepViewModel(
+            image: UIImage(named: model.imageName) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1) из \(questions.count)")
     }
@@ -108,7 +106,6 @@ final class MovieQuizViewController: UIViewController {
         counterLabel.text = step.questionNumber
         
         imageView.layer.borderWidth = 0
-        imageView.layer.cornerRadius = 0
     }
     
     private func show(quiz result: QuizResultViewModel) {
@@ -136,7 +133,6 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreenIOS.cgColor : UIColor.ypRedIOS.cgColor
-        imageView.layer.cornerRadius = 20
         
         if isCorrect {
             correctAnswers += 1
@@ -178,19 +174,19 @@ final class MovieQuizViewController: UIViewController {
     }
 }
 
-struct QuizQuestion {
-    let image: String
+private struct QuizQuestion {
+    let imageName: String
     let text: String
     let correctAnswer: Bool
 }
 
-struct QuizStepViewModel {
+private struct QuizStepViewModel {
     let image: UIImage
     let question: String
     let questionNumber: String
 }
 
-struct QuizResultViewModel {
+private struct QuizResultViewModel {
     let title: String
     let text: String
     let buttonText: String
