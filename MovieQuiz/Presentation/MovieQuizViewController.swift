@@ -24,7 +24,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private var questionFactory: QuestionFactoryProtocol?
     private let alertPresenter: AlertPresenter = AlertPresenter()
-    
+    private let statisticService: StatisticServiceProtocol = StatisticService()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -70,6 +70,30 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             questionNumber: "\(currentQuestionIndex + 1) из \(questionsAmount)")
     }
     
+    private func makeQuizResultViewModel() -> QuizResultViewModel {
+        let bestGame = statisticService.bestGame
+        let text = """
+            Ваш результат: \(correctAnswers)/\(questionsAmount)
+            Количество сыгранных квизов: \(statisticService.gamesCount)
+            Рекорд: \(bestGame.correct)/\(bestGame.total) (\(bestGame.date.dateTimeString))
+            Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+        """
+        return QuizResultViewModel(
+            title: "Этот раунд окончен!",
+            text: text,
+            buttonText: "Сыграть ещё раз")
+    }
+    
+    private func handleAnswer(_ givenAnswer: Bool) {
+        guard !isAnswerProcessing else { return }
+        guard let currentQuestion = currentQuestion else { return }
+        
+        isAnswerProcessing = true
+        
+        let correctAnswer = currentQuestion.correctAnswer
+        showAnswerResult(isCorrect: givenAnswer == correctAnswer)
+    }
+
     private func setButtonsEnabled(_ isEnabled: Bool) {
         yesButton.isEnabled = isEnabled
         noButton.isEnabled = isEnabled
@@ -99,16 +123,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         alertPresenter.show(in: self, model: model)
     }
     
-    private func handleAnswer(_ givenAnswer: Bool) {
-        guard !isAnswerProcessing else { return }
-        guard let currentQuestion = currentQuestion else { return }
-        
-        isAnswerProcessing = true
-        
-        let correctAnswer = currentQuestion.correctAnswer
-        showAnswerResult(isCorrect: givenAnswer == correctAnswer)
-    }
-    
     private func showAnswerResult(isCorrect: Bool) {
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreenIOS.cgColor : UIColor.ypRedIOS.cgColor
@@ -128,12 +142,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func showNextQuestionOrResult() {
         if currentQuestionIndex == questionsAmount - 1 {
-            let text = "Ваш результат: \(correctAnswers)/\(questionsAmount)"
-            let viewModel = QuizResultViewModel(
-                title: "Этот раунд окончен!",
-                text: text,
-                buttonText: "Сыграть ещё раз")
+            statisticService.store(
+                correctAnswers: correctAnswers,
+                questionsAmount: questionsAmount)
             
+            let viewModel = makeQuizResultViewModel()
             show(quiz: viewModel)
             
         } else {
