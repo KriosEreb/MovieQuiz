@@ -12,8 +12,7 @@ final class MovieQuizViewController: UIViewController {
         
     // MARK: - Dependencies
     private let alertPresenter: AlertPresenter = AlertPresenter()
-    let statisticService: StatisticServiceProtocol = StatisticService()
-    private lazy var presenter = MovieQuizPresenter(viewController: self)
+    private lazy var presenter: MovieQuizPresenterProtocol = MovieQuizPresenter(view: self)
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -25,50 +24,37 @@ final class MovieQuizViewController: UIViewController {
     // MARK: - Actions
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        presenter.handleAnswer(true)
+        presenter.didAnswer(true)
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        presenter.handleAnswer(false)
+        presenter.didAnswer(false)
     }
     
     // MARK: - Private Methods
-    
-    func makeQuizResultViewModel() -> QuizResultViewModel {
-        let bestGame = statisticService.bestGame
-        let text = """
-            Ваш результат: \(presenter.correctAnswers)/\(presenter.questionsAmount)
-            Количество сыгранных квизов: \(statisticService.gamesCount)
-            Рекорд: \(bestGame.correct)/\(bestGame.total) (\(bestGame.date.dateTimeString))
-            Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
-        """
-        return QuizResultViewModel(
-            title: "Этот раунд окончен!",
-            text: text,
-            buttonText: "Сыграть ещё раз")
-    }
 
-    private func setButtonsEnabled(_ isEnabled: Bool) {
-        yesButton.isEnabled = isEnabled
-        noButton.isEnabled = isEnabled
+    private func reloadData() {
+        showLoadingIndicator()
+        presenter.loadData()
     }
-    
-    func show(quiz step: QuizStepViewModel) {
-        imageView.image = UIImage(data: step.image) ?? UIImage()
-        textLabel.text = step.question
-        counterLabel.text = step.questionNumber
+}
+
+// MARK: - MovieQuizView
+
+extension MovieQuizViewController: MovieQuizViewControllerProtocol {
+    func showQuestion(_ viewModel: QuizStepViewModel) {
+        imageView.image = UIImage(data: viewModel.image) ?? UIImage()
+        textLabel.text = viewModel.question
+        counterLabel.text = viewModel.questionNumber
         
         imageView.layer.borderWidth = 0
-        
-        presenter.isAnswerProcessing = false
-        setButtonsEnabled(true)
     }
-    
-    func show(quiz result: QuizResultViewModel) {
+
+    func showResult(_ viewModel: QuizResultViewModel) {
         let model = AlertModel(
-            title: result.title,
-            message: result.text,
-            buttonText: result.buttonText) { [weak self] in
+            title: viewModel.title,
+            message: viewModel.text,
+            buttonText: viewModel.buttonText) { [weak self] in
                 guard let self = self else { return }
                 
                 presenter.restartQuiz()
@@ -76,30 +62,7 @@ final class MovieQuizViewController: UIViewController {
         
         alertPresenter.show(in: self, model: model)
     }
-    
-    func showAnswerResult(isCorrect: Bool) {
-        imageView.layer.borderWidth = 8
-        imageView.layer.borderColor = isCorrect ? UIColor.ypGreenIOS.cgColor : UIColor.ypRedIOS.cgColor
-        
-        if isCorrect {
-            presenter.correctAnswers += 1
-        }
-        
-        setButtonsEnabled(false)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {[weak self] in
-            guard let self = self else { return }
-            
-            presenter.showNextQuestionOrResult()
-        }
-    }
-    
 
-    private func reloadData() {
-        showLoadingIndicator()
-        presenter.loadData()
-    }
-    
     func showLoadingIndicator() {
         activityIndicator.isHidden = false
         activityIndicator.startAnimating()
@@ -124,5 +87,13 @@ final class MovieQuizViewController: UIViewController {
         alertPresenter.show(in: self, model: model)
     }
     
+    func highlightAnswer(isCorrect: Bool) {
+        imageView.layer.borderWidth = 8
+        imageView.layer.borderColor = isCorrect ? UIColor.ypGreenIOS.cgColor : UIColor.ypRedIOS.cgColor
+    }
     
+    func setAnswerButtonsEnabled(_ isEnabled: Bool) {
+        yesButton.isEnabled = isEnabled
+        noButton.isEnabled = isEnabled
+    }
 }

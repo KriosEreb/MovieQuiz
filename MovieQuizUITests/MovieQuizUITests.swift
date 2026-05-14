@@ -33,17 +33,6 @@ final class MovieQuizUITests: XCTestCase {
         app = nil
     }
 
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
-        app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
-    }
-    
     func testYesButton() throws {
         sleep(3)
         let firstPoster = app.images["Poster"]
@@ -108,6 +97,7 @@ final class MovieQuizUITests: XCTestCase {
         alert.buttons.firstMatch.tap()
         
         sleep(3)
+        XCTAssertFalse(alert.exists)
         XCTAssertEqual(indexLabel.label, "1/10")
     }
     
