@@ -18,10 +18,14 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     var correctAnswers: Int = 0
     
     // MARK: - Dependencies
-    weak var viewController: MovieQuizViewController?
-    private lazy var questionFactory: QuestionFactoryProtocol = QuestionFactory(
-        moviesLoader: MoviesLoader(),
-        delegate: self)
+    private weak var viewController: MovieQuizViewController?
+    private var questionFactory: QuestionFactoryProtocol?
+    
+    init(viewController: MovieQuizViewController) {
+        self.viewController = viewController
+        
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+    }
     
     // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
@@ -44,26 +48,28 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
     
     func loadData() {
-        questionFactory.loadData()
+        questionFactory?.loadData()
     }
     
-    func requestNextQuestion() {
-        questionFactory.requestNextQuestion()
+    private func requestNextQuestion() {
+        questionFactory?.requestNextQuestion()
     }
     
-    func isLastQuestion() -> Bool {
+    private func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsAmount - 1
     }
     
-    func resetQuestionIndex() {
+    func restartQuiz() {
+        correctAnswers = 0
         currentQuestionIndex = 0
+        requestNextQuestion()
     }
     
-    func switchToNextQuestion() {
+    private func switchToNextQuestion() {
         currentQuestionIndex += 1
     }
     
-    func convert(model: QuizQuestion) -> QuizStepViewModel {
+    private func convert(model: QuizQuestion) -> QuizStepViewModel {
         QuizStepViewModel(
             image: model.image,
             question: model.text,

@@ -13,15 +13,13 @@ final class MovieQuizViewController: UIViewController {
     // MARK: - Dependencies
     private let alertPresenter: AlertPresenter = AlertPresenter()
     let statisticService: StatisticServiceProtocol = StatisticService()
-    private let presenter: MovieQuizPresenter = MovieQuizPresenter()
+    private lazy var presenter = MovieQuizPresenter(viewController: self)
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
         imageView.layer.masksToBounds = true
-        
-        presenter.viewController = self
         reloadData()
     }
     // MARK: - Actions
@@ -73,7 +71,7 @@ final class MovieQuizViewController: UIViewController {
             buttonText: result.buttonText) { [weak self] in
                 guard let self = self else { return }
                 
-                self.restartQuiz()
+                presenter.restartQuiz()
             }
         
         alertPresenter.show(in: self, model: model)
@@ -96,12 +94,6 @@ final class MovieQuizViewController: UIViewController {
         }
     }
     
-    private func restartQuiz() {
-        presenter.correctAnswers = 0
-        presenter.resetQuestionIndex()
-        
-        presenter.requestNextQuestion()
-    }
 
     private func reloadData() {
         showLoadingIndicator()
