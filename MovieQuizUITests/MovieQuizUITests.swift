@@ -80,8 +80,6 @@ final class MovieQuizUITests: XCTestCase {
     
     func testGameFinish() throws {
         sleep(3)
-        var indexLabel = app.staticTexts["Index"]
-        
         
         for _ in 1...10 {
             app.buttons["Yes"].tap()
