@@ -74,7 +74,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         QuizStepViewModel(
             image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
-            questionNumber: "\(currentQuestionIndex + 1) из \(questionsAmount)")
+            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
     
     private func makeQuizResultViewModel() -> QuizResultViewModel {
